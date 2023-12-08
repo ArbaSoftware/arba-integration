@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inloggen</title>
+</head>
+<body>
+    <form method="post" action="/oauth2/dologin?clientid={clientid}&callbackurl={callbackurl}">
+        <table>
+            <tr>
+                <td>User</td>
+                <td>
+                    <input type="text" name="user"/>
+                </td>
+            </tr>
+            <tr>
+                <td>Wachtwoord</td>
+                <td>
+                    <input type="password" name="password"/>
+                </td>
+            </tr>
+        </table>
+        <input type="submit" value="Inloggen"/>
+    </form>
+</body>
+</html>

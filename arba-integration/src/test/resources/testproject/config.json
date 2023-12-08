@@ -1,0 +1,50 @@
+{
+  "settings": {
+    "ada.base.url": "http://192.168.2.74:9601/ada",
+    "camunda.restapi.url": "http://192.168.2.74:9600/engine-rest"
+  },
+  "stepclasses": [
+    "nl.arba.integration.execution.steps.AddToCollection",
+    "nl.arba.integration.execution.steps.AvailableSteps",
+    "nl.arba.integration.execution.steps.Content",
+    "nl.arba.integration.execution.steps.ForEach",
+    "nl.arba.integration.execution.steps.Header",
+    "nl.arba.integration.execution.steps.HttpCall",
+    "nl.arba.integration.execution.steps.JsonProperty",
+    "nl.arba.integration.execution.steps.Log",
+    "nl.arba.integration.execution.steps.Property",
+    "nl.arba.integration.execution.steps.Step",
+    "nl.arba.integration.execution.steps.Transform",
+    "nl.arba.integration.execution.steps.ValidateJson",
+    "nl.arba.integration.execution.steps.TranslateJson",
+    "nl.arba.integration.execution.steps.AddToJsonArray"
+  ],
+  "apis": [
+    {
+      "uripattern": "/test",
+      "authorization": "none",
+      "methods": [
+        "get"
+      ],
+      "steps": [
+        {
+          "name": "property",
+          "settings": {
+            "name": "api.response",
+            "value": "new HttpResponse(200)"
+          }
+        },
+        {
+          "name": "content",
+          "settings":
+          {
+            "property": "api.response",
+            "contenttype": "text/text",
+            "content": "'OK'"
+          }
+        }
+      ]
+    }
+  ],
+  "daemons": []
+}
