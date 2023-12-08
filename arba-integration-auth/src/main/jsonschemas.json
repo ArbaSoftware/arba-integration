@@ -1,0 +1,18 @@
+{
+  "schemas": {
+    "startdonatievoorstel": {
+      "doel": {
+        "required": true,
+        "type": "string"
+      },
+      "bedrag": {
+        "required": true,
+        "type": "integer"
+      },
+      "goedkeurder": {
+        "required": true,
+        "type" : "string"
+      }
+    }
+  }
+}
