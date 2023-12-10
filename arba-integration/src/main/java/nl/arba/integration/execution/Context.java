@@ -2,6 +2,7 @@ package nl.arba.integration.execution;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.arba.integration.config.Configuration;
+import nl.arba.integration.execution.expressions.GeneralFunctions;
 import nl.arba.integration.model.*;
 import nl.arba.integration.utils.JsonUtils;
 import nl.arba.integration.utils.PatternUtils;
@@ -56,6 +57,10 @@ public class Context {
         return variables.get(translateVariableName(name));
     }
 
+    public String[] getVariableNames() {
+        return variables.keySet().toArray(new String[0]);
+    }
+
     private String translateVariableName(String name) {
         if ("api.source".equals(name))
             return API_REQUEST;
@@ -91,45 +96,6 @@ public class Context {
             HttpRequest source = (HttpRequest) getVariable(API_REQUEST);
             return source.getHeaders().get(expression.substring(expression.lastIndexOf(".")+1));
         }
-        else if (Pattern.matches(PatternUtils.parseJson(), expression)) {
-            String jsonExpression = expression.substring(expression.indexOf("(")+1, expression.lastIndexOf(")"));
-            Object value = evaluate(jsonExpression);
-            if (value instanceof HttpResponse) {
-                byte[] jsonbytes = ((HttpResponse) value).getContent();
-                ObjectMapper mapper = new ObjectMapper();
-                try {
-                    Map data = mapper.readValue(jsonbytes, Map.class);
-                    return JsonObject.fromMap(data);
-                }
-                catch (Exception err) {
-                    try {
-                        Map<String,Object>[] array = mapper.readValue(jsonbytes, Map[].class);
-                        return JsonArray.fromMaps(array);
-                    }
-                    catch (Exception err2) {
-                        return null;
-                    }
-                }
-            }
-            else if (value instanceof byte[]) {
-                byte[] jsonbytes = (byte[])value;
-                ObjectMapper mapper = new ObjectMapper();
-                try {
-                    Map data = mapper.readValue(jsonbytes, Map.class);
-                    return JsonObject.fromMap(data);
-                }
-                catch (Exception err) {
-                    try {
-                        Map<String,Object>[] array = mapper.readValue(jsonbytes, Map[].class);
-                        return JsonArray.fromMaps(array);
-                    }
-                    catch (Exception err2) {
-                        return null;
-                    }
-                }
-            }
-            return null;
-        }
         else if (Pattern.matches(PatternUtils.createHttpRequest(), expression)) {
             HttpRequest request = new HttpRequest();
             String method = expression.substring("new HttpRequest(".length()+1);
@@ -141,36 +107,8 @@ public class Context {
             request.setUrl(url);
             return request;
         }
-        else if (Pattern.matches(PatternUtils.evalJs(), expression)){
-            try {
-                ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
-                SimpleBindings bindings = new SimpleBindings();
-                String initJson = "";
-                for (String variable: variables.keySet()) {
-                    Object value = variables.get(variable);
-                    if (value instanceof JsonArray) {
-                        JsonArray array = (JsonArray) value;
-                        List<JsonObject> items = array.getItems();
-                        Map[] mapItems = new Map[items.size()];
-                        for (int index = 0; index < mapItems.length; index++)
-                            mapItems[index] = items.get(index).toMap();
-                        String json = new ObjectMapper().writeValueAsString(mapItems);
-                        initJson += (variable + "=" + json + ";");
-                    }
-                    else if (value instanceof String) {
-                        bindings.put(variable, value);
-                    }
-                    else if (value instanceof JsonObject) {
-                        initJson += (variable + "=" + ((JsonObject) value).toJson() + ";");
-                    }
-                }
-                String jsExpression = initJson + ";" + expression.substring(expression.indexOf("(")+1, expression.lastIndexOf(")")).replaceAll("\n", "");
-                return engine.eval(jsExpression, bindings);
-            }
-            catch (Exception err) {
-                err.printStackTrace();
-                return null;
-            }
+        else if (GeneralFunctions.isGeneralFunction(expression)) {
+            return GeneralFunctions.evaluate(expression, this);
         }
         else if (Pattern.matches(PatternUtils.translateJson(), expression)) {
             String[] parameters = expression.substring("translateJson(".length(), expression.lastIndexOf(")")).split(Pattern.quote(","));

@@ -5,8 +5,10 @@ import nl.arba.integration.model.HttpRequest;
 import nl.arba.integration.model.HttpResponse;
 import nl.arba.integration.model.JsonArray;
 import nl.arba.integration.model.JsonObject;
+import nl.arba.integration.utils.PatternUtils;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Content extends Step {

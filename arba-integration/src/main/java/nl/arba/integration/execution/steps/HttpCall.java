@@ -4,17 +4,25 @@ import nl.arba.integration.execution.Context;
 import nl.arba.integration.model.HttpMethod;
 import nl.arba.integration.model.HttpRequest;
 import nl.arba.integration.model.HttpResponse;
+import nl.arba.integration.utils.JsonUtils;
+import nl.arba.integration.utils.StreamUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpCall extends Step {
     private String requestVariable;
@@ -41,6 +49,7 @@ public class HttpCall extends Step {
                 return true;
             }
             catch (Exception err) {
+                err.printStackTrace();
                 return false;
             }
         }
@@ -50,9 +59,19 @@ public class HttpCall extends Step {
             for (String header: headers.keySet()) {
                 post.addHeader(header, headers.get(header));
             }
+            System.out.println("Content type:" + request.getContentType() + "/" + ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
             if ("text/json".equals(request.getContentType())) {
-                System.out.println("Post request: " + new String(request.getPostBody()));
                 post.setEntity(new ByteArrayEntity(request.getPostBody(), ContentType.APPLICATION_JSON, false));
+            }
+            else if ("application/x-www-form-urlencoded".equals(request.getContentType())) {
+                try {
+                    Map<String, String> formValues = JsonUtils.getMapper().readValue(request.getPostBody(), Map.class);
+                    System.out.println("Namevalues: " + formValues);
+                    ArrayList<NameValuePair> values = new ArrayList<>();
+                    values.addAll(formValues.keySet().stream().map(k -> new BasicNameValuePair(k, formValues.get(k))).collect(Collectors.toList()));
+                    post.setEntity(new UrlEncodedFormEntity(values));
+                }
+                catch (Exception err) {}
             }
             try {
                 CloseableHttpResponse response = client.execute(post);
@@ -61,6 +80,7 @@ public class HttpCall extends Step {
                 return true;
             }
             catch (Exception err) {
+                err.printStackTrace();
                 return false;
             }
         }

@@ -1,7 +1,11 @@
 {
   "settings": {
-    "ada.base.url": "http://192.168.2.74:9601/ada",
-    "camunda.restapi.url": "http://192.168.2.74:9600/engine-rest"
+    "keycloak.api.url": "http://192.168.2.74:9443/auth/admin/realms/Arba",
+    "keycloak.token.url": "http://192.168.2.74:9443/auth/realms/Arba/protocol/openid-connect/token",
+    "keycloak.client.secret": "pXjlhpkKArzAWYGxR4cSPpck1GzmtUbh",
+    "keycloak.client.id": "ada",
+    "keycloak.api.user": "api_user",
+    "keycloak.api.password": "#Kc@q}LG+L8R6Jv"
   },
   "stepclasses": [
     "nl.arba.integration.execution.steps.AddToCollection",
@@ -30,17 +34,85 @@
         {
           "name": "property",
           "settings": {
+            "name": "api.token.request",
+            "value": "new HttpRequest('post','{keycloak.token.url}')"
+          }
+        },
+        {
+          "name": "property",
+          "settings": {
+            "name": "api.token.request.body",
+            "value": "new JsonObject()"
+          }
+        },
+        {
+          "name": "jsonproperty",
+          "settings": {
+            "name": "api.token.request.body",
+            "property": "client_secret",
+            "value": "{keycloak.client.secret}"
+          }
+        },
+        {
+          "name": "jsonproperty",
+          "settings": {
+            "name": "api.token.request.body",
+            "property": "client_id",
+            "value": "{keycloak.client.id}"
+          }
+        },
+        {
+          "name": "jsonproperty",
+          "settings": {
+            "name": "api.token.request.body",
+            "property": "grant_type",
+            "value": "'password'"
+          }
+        },
+        {
+          "name": "jsonproperty",
+          "settings": {
+            "name": "api.token.request.body",
+            "property": "username",
+            "value": "{keycloak.api.user}"
+          }
+        },
+        {
+          "name": "jsonproperty",
+          "settings": {
+            "name": "api.token.request.body",
+            "property": "password",
+            "value": "{keycloak.api.password}"
+          }
+        },
+        {
+          "name": "content",
+          "settings": {
+            "property": "api.token.request",
+            "contenttype": "application/x-www-form-urlencoded",
+            "content": "{api.token.request.body}"
+          }
+        },
+        {
+          "name": "httpcall",
+          "settings": {
+            "request": "api.token.request",
+            "response": "api.token.response"
+          }
+        },
+        {
+          "name": "property",
+          "settings": {
             "name": "api.response",
             "value": "new HttpResponse(200)"
           }
         },
         {
           "name": "content",
-          "settings":
-          {
+          "settings": {
             "property": "api.response",
-            "contenttype": "text/",
-            "content": "'Got users'"
+            "contenttype": "text/json",
+            "content": "{api.token.response}"
           }
         }
       ]
