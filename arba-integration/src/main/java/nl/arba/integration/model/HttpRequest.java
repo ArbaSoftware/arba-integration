@@ -14,6 +14,15 @@ public class HttpRequest {
     private byte[] postBody;
     private String contentType;
 
+    public HttpRequest() {
+
+    }
+
+    public HttpRequest(String method, String url) {
+        setUrl(url);
+        setMethod(HttpMethod.fromString(method));
+    }
+
     public void setUriParam(String name, String value) {
         uriParams.put(name, value);
     }

@@ -1,6 +1,7 @@
 package nl.arba.integration.execution.steps;
 
 import nl.arba.integration.execution.Context;
+import nl.arba.integration.execution.expressions.InvalidExpressionException;
 
 public class Log extends Step {
     private String expression;
@@ -12,9 +13,14 @@ public class Log extends Step {
 
     @Override
     public boolean execute(Context context) {
-        Object toLog = context.evaluate(expression);
-        System.out.println(toLog);
-        return true;
+        try {
+            Object toLog = context.evaluate(expression);
+            System.out.println(toLog);
+            return true;
+        }
+        catch (InvalidExpressionException e) {
+            return false;
+        }
     }
 
     @Override

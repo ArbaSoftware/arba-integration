@@ -1,21 +1,12 @@
 package nl.arba.integration.execution;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.arba.integration.config.Configuration;
-import nl.arba.integration.execution.expressions.GeneralFunctions;
-import nl.arba.integration.model.*;
-import nl.arba.integration.utils.JsonUtils;
-import nl.arba.integration.utils.PatternUtils;
-import nl.arba.integration.utils.StreamUtils;
+import nl.arba.integration.execution.expressions.Expression;
+import nl.arba.integration.execution.expressions.InvalidExpressionException;
 import nl.arba.integration.validation.json.JsonValidator;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.SimpleBindings;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class Context {
     public static final String API_REQUEST = "api.request";
@@ -78,133 +69,7 @@ public class Context {
         return this.jsonStylesheets;
     }
 
-    public Object evaluate(String expression) {
-        if (Pattern.matches(PatternUtils.apiSourceUriParam(), expression)) {
-            HttpRequest source = (HttpRequest) getVariable(API_REQUEST);
-            return source.getUriParam(expression.substring(expression.lastIndexOf(".")+1));
-        }
-        else if (Pattern.matches(PatternUtils.createCollection(), expression)) {
-            return new Collection();
-        }
-        else if (Pattern.matches(PatternUtils.createJsonObject(), expression)) {
-            return new JsonObject();
-        }
-        else if (Pattern.matches(PatternUtils.createJsonArray(), expression)) {
-            return new JsonArray();
-        }
-        else if (Pattern.matches(PatternUtils.apiSourceHeader(), expression)) {
-            HttpRequest source = (HttpRequest) getVariable(API_REQUEST);
-            return source.getHeaders().get(expression.substring(expression.lastIndexOf(".")+1));
-        }
-        else if (Pattern.matches(PatternUtils.createHttpRequest(), expression)) {
-            HttpRequest request = new HttpRequest();
-            String method = expression.substring("new HttpRequest(".length()+1);
-            method = method.substring(0, method.indexOf("'"));
-            request.setMethod(HttpMethod.fromString(method));
-            String urlExpression = expression.substring("new HttpRequest(".length() + method.length()+3);
-            urlExpression = urlExpression.substring(0, urlExpression.lastIndexOf(")"));
-            String url = (String) evaluate(urlExpression);
-            request.setUrl(url);
-            return request;
-        }
-        else if (GeneralFunctions.isGeneralFunction(expression)) {
-            return GeneralFunctions.evaluate(expression, this);
-        }
-        else if (Pattern.matches(PatternUtils.translateJson(), expression)) {
-            String[] parameters = expression.substring("translateJson(".length(), expression.lastIndexOf(")")).split(Pattern.quote(","));
-            String valueExpression = parameters[0];
-            String stylesheetExpression = parameters[1].trim();
-            return JsonUtils.translate(StreamUtils.objectToStream(evaluate(valueExpression)),getJsonStylesheets(), (String) evaluate(stylesheetExpression));
-        }
-        else if (Pattern.matches(PatternUtils.stringLiteral(), expression)) {
-            String stringLiteral = expression.substring(1, expression.length()-1);
-            Pattern subExpression = Pattern.compile("\\{([^\\}]*)\\}");
-            if (JsonUtils.isValidJson(stringLiteral)) {
-                return stringLiteral;
-            }
-            else if (subExpression.matcher(stringLiteral).find()) {
-                String result = "";
-                int prevpos = 0;
-                int pos = stringLiteral.indexOf('{');
-                while (pos >= 0) {
-                    result += stringLiteral.substring(prevpos, pos);
-                    String sub = stringLiteral.substring(pos+1);
-                    sub = sub.substring(0, sub.indexOf("}"));
-                    String evalResult = (String) evaluate("{"+ sub + "}");
-                    result += evalResult;
-                    prevpos = stringLiteral.indexOf("}", pos)+1;
-                    pos = stringLiteral.indexOf("{", prevpos);
-                }
-                result += stringLiteral.substring(prevpos);
-                return result;
-            }
-            else {
-                return expression.substring(1, expression.length()-1);
-            }
-        }
-        else if (Pattern.matches("\\{([^\\}]*)\\}", expression)) {
-            String sub = expression.substring(1, expression.length()-1);
-            if (hasVariable(sub))
-                return getVariable(sub);
-            else if (getConfiguration().hasSetting(sub))
-                return getConfiguration().getSetting(sub);
-            else if (sub.contains(".")) {
-                String[] items = sub.split(Pattern.quote("."));
-                Object current = null;
-                for (String item: items) {
-                    if (current == null)
-                        current = evaluate("{" + item + "}");
-                    else {
-                        if (current instanceof Map) {
-                            Map map = (Map) current;
-                            if (map.containsKey(item))
-                                current = map.get(item);
-                        }
-                        else if (current instanceof HttpResponse) {
-                            HttpResponse response = (HttpResponse) current;
-                            if (response.getContentType().startsWith("text/json") || response.getContentType().startsWith("application/json")) {
-                                String json = new String(response.getContent());
-                                try {
-                                    if (json.startsWith("[")) {
-                                        current = JsonArray.fromJson(json);
-                                    } else {
-                                        current = JsonObject.fromJson(json);
-                                    }
-
-                                    if (Pattern.matches(PatternUtils.jsonPropertyFilter(), item)) {
-                                        current = ((JsonObject) current).evaluateFilter(item);
-                                    }
-                                    else if (current instanceof JsonObject && ((JsonObject) current).hasProperty(item)) {
-                                        current = ((JsonObject) current).getProperty(item);
-                                    }
-                                }
-                                catch (Exception err) {
-                                    return false;
-                                }
-                            }
-                            else if (response.getContentType().startsWith("text/html")) {
-                                System.out.println("HTML response: " + new String(response.getContent()));
-                            }
-                        }
-                        else if (current instanceof JsonObject) {
-                            JsonObject o = (JsonObject) current;
-                            if (o.hasProperty(item)) {
-                                current = o.getProperty(item);
-                            }
-                        }
-                    }
-                }
-                return current;
-            }
-            else
-                return null;
-        }
-        else if (Pattern.matches(PatternUtils.createHttpResponse(), expression)) {
-            String code = expression.substring("new HttpResponse(".length());
-            code = code.substring(0, code.lastIndexOf(")"));
-            return HttpResponse.create(Integer.parseInt(code));
-        }
-        else
-            return null;
+    public Object evaluate(String expression) throws InvalidExpressionException {
+        return Expression.evaluate(this, expression);
     }
 }

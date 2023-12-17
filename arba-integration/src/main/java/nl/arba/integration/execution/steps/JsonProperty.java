@@ -1,6 +1,7 @@
 package nl.arba.integration.execution.steps;
 
 import nl.arba.integration.execution.Context;
+import nl.arba.integration.execution.expressions.InvalidExpressionException;
 import nl.arba.integration.model.Collection;
 import nl.arba.integration.model.HttpResponse;
 import nl.arba.integration.model.JsonArray;
@@ -25,53 +26,53 @@ public class JsonProperty extends Step {
 
     @Override
     public boolean execute(Context context) {
-        JsonObject jsonObject = (JsonObject) context.getVariable(jsonVariable);
-        Object newValue = context.evaluate(valueExpression);
-        if (newValue instanceof String)
-            jsonObject.setProperty(propertyName, (String) newValue);
-        else if (newValue instanceof JsonArray)
-            jsonObject.setProperty(propertyName, (JsonArray) newValue);
-        else if (newValue instanceof Collection) {
-            Collection coll = (Collection) newValue;
-            if (!coll.getItems().stream().anyMatch(i -> !(i instanceof JsonObject))) {
-                JsonArray array = new JsonArray();
-                for (Object item: coll.getItems())
-                    array.add((JsonObject) item);
-                jsonObject.setProperty(propertyName, array);
-            }
-        }
-        else if (newValue instanceof HttpResponse) {
-            HttpResponse response= (HttpResponse) newValue;
-            if (response.getContentType().startsWith("text/json") || response.getContentType().startsWith("application/json")) {
-                String json = new String(response.getContent());
-                if (json.startsWith("[")) {
+        try {
+            JsonObject jsonObject = (JsonObject) context.getVariable(jsonVariable);
+            Object newValue = context.evaluate(valueExpression);
+            if (newValue instanceof String)
+                jsonObject.setProperty(propertyName, (String) newValue);
+            else if (newValue instanceof JsonArray)
+                jsonObject.setProperty(propertyName, (JsonArray) newValue);
+            else if (newValue instanceof Collection) {
+                Collection coll = (Collection) newValue;
+                if (!coll.getItems().stream().anyMatch(i -> !(i instanceof JsonObject))) {
                     JsonArray array = new JsonArray();
-                    try {
-                        Map[] arrayItems = JsonUtils.getMapper().readValue(json, Map[].class);
-                        for (Map item : arrayItems) {
-                            array.add(JsonObject.fromMap(item));
+                    for (Object item : coll.getItems())
+                        array.add((JsonObject) item);
+                    jsonObject.setProperty(propertyName, array);
+                }
+            } else if (newValue instanceof HttpResponse) {
+                HttpResponse response = (HttpResponse) newValue;
+                if (response.getContentType().startsWith("text/json") || response.getContentType().startsWith("application/json")) {
+                    String json = new String(response.getContent());
+                    if (json.startsWith("[")) {
+                        JsonArray array = new JsonArray();
+                        try {
+                            Map[] arrayItems = JsonUtils.getMapper().readValue(json, Map[].class);
+                            for (Map item : arrayItems) {
+                                array.add(JsonObject.fromMap(item));
+                            }
+                            jsonObject.setProperty(propertyName, array);
+                        } catch (Exception err) {
+                            err.printStackTrace();
                         }
-                        jsonObject.setProperty(propertyName, array);
-                    }
-                    catch (Exception err) {
-                        err.printStackTrace();
-                    }
-                }
-                else {
-                    try {
-                        JsonObject object = JsonObject.fromJson(json);
-                    }
-                    catch (Exception err) {
-                        err.printStackTrace();
+                    } else {
+                        try {
+                            JsonObject object = JsonObject.fromJson(json);
+                        } catch (Exception err) {
+                            err.printStackTrace();
+                        }
                     }
                 }
+            } else if (newValue instanceof Integer) {
+                jsonObject.setProperty(propertyName, (Integer) newValue);
             }
-        }
-        else if (newValue instanceof Integer) {
-            jsonObject.setProperty(propertyName, (Integer) newValue);
-        }
 
-        return true;
+            return true;
+        }
+        catch (InvalidExpressionException e) {
+            return false;
+        }
     }
 
     @Override

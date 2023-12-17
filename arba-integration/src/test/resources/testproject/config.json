@@ -19,6 +19,12 @@
     "nl.arba.integration.execution.steps.TranslateJson",
     "nl.arba.integration.execution.steps.AddToJsonArray"
   ],
+  "beans": [
+    {
+      "classname": "nl.arba.integration.execution.beans.OAuth",
+      "name": "OAuth"
+    }
+  ],
   "apis": [
     {
       "uripattern": "/test",
@@ -27,6 +33,13 @@
         "get"
       ],
       "steps": [
+        {
+          "name": "property",
+          "settings": {
+            "name": "oauth.token",
+            "value": "OAuth.getToken('arjan', 'hemertje')"
+          }
+        },
         {
           "name": "property",
           "settings": {

@@ -1,6 +1,7 @@
 package nl.arba.integration.execution.steps;
 
 import nl.arba.integration.execution.Context;
+import nl.arba.integration.execution.expressions.InvalidExpressionException;
 import nl.arba.integration.model.HttpRequest;
 
 import java.util.ArrayList;
@@ -18,15 +19,19 @@ public class Header extends Step {
     }
     @Override
     public boolean execute(Context context) {
-        Object propertyValue = context.getVariable(property);
-        if (propertyValue instanceof HttpRequest) {
-            String headerValue = (String) context.evaluate(valueExpression);
-            if (headerValue != null)
-                ((HttpRequest) propertyValue).setHeader(name, headerValue);
-            return true;
+        try {
+            Object propertyValue = context.getVariable(property);
+            if (propertyValue instanceof HttpRequest) {
+                String headerValue = (String) context.evaluate(valueExpression);
+                if (headerValue != null)
+                    ((HttpRequest) propertyValue).setHeader(name, headerValue);
+                return true;
+            } else
+                return false;
         }
-        else
+        catch (InvalidExpressionException e) {
             return false;
+        }
     }
 
     @Override

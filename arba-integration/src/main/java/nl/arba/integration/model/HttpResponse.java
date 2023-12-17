@@ -12,7 +12,7 @@ public class HttpResponse {
     private String contentType;
     private int responseCode;
 
-    private HttpResponse(int responsecode) {
+    public HttpResponse(Integer responsecode) {
         responseCode= responsecode;
     }
 

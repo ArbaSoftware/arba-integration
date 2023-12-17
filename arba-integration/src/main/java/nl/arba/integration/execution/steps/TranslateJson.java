@@ -1,6 +1,7 @@
 package nl.arba.integration.execution.steps;
 
 import nl.arba.integration.execution.Context;
+import nl.arba.integration.execution.expressions.InvalidExpressionException;
 import nl.arba.integration.utils.JsonUtils;
 import nl.arba.integration.utils.StreamUtils;
 
@@ -14,11 +15,16 @@ public class TranslateJson extends Step {
 
     @Override
     public boolean execute(Context context) {
-        Object source = context.evaluate(getConfiguration().getSetting("source").toString());
-        InputStream streamSource = StreamUtils.objectToStream(source);
-        Map<String,Object> allstylesheets = context.getJsonStylesheets();
-        context.setVariable(getConfiguration().getSetting("outputvariable").toString(), JsonUtils.translate(streamSource, allstylesheets, getConfiguration().getSetting("stylesheet").toString()));
-        return true;
+        try {
+            Object source = context.evaluate(getConfiguration().getSetting("source").toString());
+            InputStream streamSource = StreamUtils.objectToStream(source);
+            Map<String, Object> allstylesheets = context.getJsonStylesheets();
+            context.setVariable(getConfiguration().getSetting("outputvariable").toString(), JsonUtils.translate(streamSource, allstylesheets, getConfiguration().getSetting("stylesheet").toString()));
+            return true;
+        }
+        catch (InvalidExpressionException e) {
+            return false;
+        }
     }
 
     @Override

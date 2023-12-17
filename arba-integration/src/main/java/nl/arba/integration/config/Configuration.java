@@ -14,6 +14,7 @@ public class Configuration {
     private Map<String, Object> settings;
     private String[] stepClasses;
     private Daemon[] daemons;
+    private Bean[] beans = new Bean[0];
 
     public static Configuration create(InputStream source) throws IOException {
         return JsonUtils.getMapper().readValue(source, Configuration.class);
@@ -67,5 +68,26 @@ public class Configuration {
 
     public Daemon[] getDaemons() {
         return daemons;
+    }
+
+    public void setBeans(Bean[] beans) {
+        this.beans = beans;
+    }
+
+    public Bean[] getBeans() {
+        return beans;
+    }
+
+    public boolean hasBean(String name) {
+        if (beans == null)
+            return false;
+        boolean found = false;
+        for (Bean b: beans) {
+            if (b.getName().equals(name)) {
+                found = true;
+                break;
+            }
+        }
+        return found;
     }
 }

@@ -1,6 +1,7 @@
 package nl.arba.integration;
 
 import nl.arba.integration.config.Api;
+import nl.arba.integration.config.Bean;
 import nl.arba.integration.config.Configuration;
 import nl.arba.integration.config.Daemon;
 import nl.arba.integration.servlets.ApisServlet;
@@ -50,6 +51,7 @@ public class Projects {
         HashMap<String, Object> allsettings = new HashMap<>();
         ArrayList<String> stepClasses = new ArrayList<>();
         ArrayList<Daemon> daemons = new ArrayList<>();
+        ArrayList<Bean> beans = new ArrayList<>();
 
         for (File project: inputs) {
             ZipFile projectzip = new ZipFile(project);
@@ -73,6 +75,14 @@ public class Projects {
             }
             for (Daemon daemon: config.getDaemons())
                 daemons.add(daemon);
+            for (Bean bean: config.getBeans()) {
+                Optional<Bean> opt = beans.stream().filter(b -> b.getClassname().equals(bean.getClassname()) && b.getName().equals(bean.getName())).findFirst();
+                Optional<Bean> problem = beans.stream().filter(b -> !b.getClassname().equals(bean.getClassname()) && b.getName().equals(bean.getName())).findFirst();
+                if (problem.isPresent())
+                    throw new IOException("Invalid configuration, bean with same name but other classname");
+                if (!opt.isPresent())
+                    beans.add(bean);
+            }
 
             for (Api api: config.getApis()) {
                 Optional<Api> existing = apis.stream().filter(a -> a.getUriPattern().equals(api.getUriPattern())).findFirst();
