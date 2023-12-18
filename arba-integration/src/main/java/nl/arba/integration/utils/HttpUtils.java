@@ -51,9 +51,9 @@ public class HttpUtils {
 
     public static void sendResponse(HttpResponse response, HttpServletResponse httpresponse) throws IOException {
         httpresponse.setStatus(response.getCode());
-        httpresponse.setContentLength(response.getContent().length);
+        httpresponse.setContentLength(response.getContent() == null ? 0: response.getContent().length);
         httpresponse.setContentType(response.getContentType());
-        sendBytes(response.getContent(), httpresponse);
+        sendBytes(response.getContent() == null ? new byte[0]: response.getContent(), httpresponse);
     }
 
 }

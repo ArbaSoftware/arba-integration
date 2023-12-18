@@ -60,10 +60,7 @@ public class HttpCall extends Step {
                 post.addHeader(header, headers.get(header));
             }
             System.out.println("Content type:" + request.getContentType() + "/" + ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-            if ("text/json".equals(request.getContentType())) {
-                post.setEntity(new ByteArrayEntity(request.getPostBody(), ContentType.APPLICATION_JSON, false));
-            }
-            else if ("application/x-www-form-urlencoded".equals(request.getContentType())) {
+            if ("application/x-www-form-urlencoded".equals(request.getContentType())) {
                 try {
                     Map<String, String> formValues = JsonUtils.getMapper().readValue(request.getPostBody(), Map.class);
                     System.out.println("Namevalues: " + formValues);
@@ -73,7 +70,11 @@ public class HttpCall extends Step {
                 }
                 catch (Exception err) {}
             }
+            else if ("text/json".equals(request.getContentType())) {
+                post.setEntity(new ByteArrayEntity(request.getPostBody(), ContentType.APPLICATION_JSON, false));
+            }
             try {
+                System.out.println("Http call: " + request.getUrl());
                 CloseableHttpResponse response = client.execute(post);
                 context.setVariable(responseVariable.equals("api.response")? Context.API_RESPONSE: responseVariable, HttpResponse.from(response));
                 System.out.println("Post request: " + response.getCode());

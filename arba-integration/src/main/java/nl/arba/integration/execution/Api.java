@@ -83,6 +83,7 @@ public class Api {
             boolean result = step.execute(context);
             if (!result) {
                 succeeded = false;
+                System.out.println("Failed at: " + step);
                 break;
             }
         }

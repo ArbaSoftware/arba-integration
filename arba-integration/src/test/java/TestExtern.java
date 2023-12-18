@@ -5,6 +5,7 @@ import nl.arba.integration.utils.StreamUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -102,6 +103,7 @@ public class TestExtern {
         post.setEntity(new ByteArrayEntity(JsonUtils.getMapper().writeValueAsBytes(jsonInput), ContentType.APPLICATION_JSON));
         CloseableHttpResponse response = httpClient.execute(post);
         Assert.assertEquals("Ongeldige response code", 200, response.getCode());
+        System.out.println(StreamUtils.streamToString(response.getEntity().getContent()));
     }
 
     @Test
@@ -120,6 +122,37 @@ public class TestExtern {
         CloseableHttpResponse response = httpClient.execute(get);
         Assert.assertEquals("Ongeldige response code", 200, response.getCode());
         System.out.println(StreamUtils.streamToString(response.getEntity().getContent()));
+    }
+
+    @Test
+    public void test_all() throws Exception {
+        HttpPost post = new HttpPost("http://localhost:8180/administratie/donatieverzoek/start");
+        post.addHeader("Authorization", "Bearer " + token);
+        HashMap <String, Object> jsonInput = new HashMap<>();
+        jsonInput.put("doel", "Woord en daad");
+        jsonInput.put("bedrag", 125);
+        jsonInput.put("goedkeurder", "abc");
+        post.setEntity(new ByteArrayEntity(JsonUtils.getMapper().writeValueAsBytes(jsonInput), ContentType.APPLICATION_JSON));
+        CloseableHttpResponse response = httpClient.execute(post);
+        Assert.assertEquals("Ongeldige response code", 200, response.getCode());
+
+        HttpGet get = new HttpGet("http://localhost:8180/administratie/donatieverzoek");
+        get.addHeader("Authorization", "Bearer " + token);
+        response = httpClient.execute(get);
+        Assert.assertEquals("Ongeldige response code", 200, response.getCode());
+        Map[] items = JsonUtils.getMapper().readValue(response.getEntity().getContent(), Map[].class);
+
+        String itemId = items[0].get("id").toString();
+
+        HttpPut put = new HttpPut("http://localhost:8180/administratie/donatieverzoek/" + itemId);
+        put.addHeader("Authorization", "Bearer "+ token);
+        HashMap<String,Object> request = new HashMap<>();
+        request.put("doel", "Woord en Daad");
+        request.put("bedrag", 126);
+        request.put("akoord", true);
+        put.setEntity(new ByteArrayEntity(JsonUtils.getMapper().writeValueAsBytes(request), ContentType.APPLICATION_JSON));
+        response = httpClient.execute(put);
+        Assert.assertEquals("Ongeldige response code", 200, response.getCode());
     }
 
     @After
