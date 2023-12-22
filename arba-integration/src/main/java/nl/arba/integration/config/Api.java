@@ -10,6 +10,7 @@ import java.awt.image.RenderedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class Api {
     private String uriPattern;
@@ -50,11 +51,12 @@ public class Api {
         if (steps == null || steps.length == 0)
             errors.add("No steps specified for api");
         for (Step step: getSteps()) {
-            if (!Arrays.asList(stepclasses).stream().filter(s -> s.toLowerCase().endsWith("." + step.getName())).findFirst().isPresent())
+            Optional <String> stepClass = Arrays.asList(stepclasses).stream().filter(s -> s.toLowerCase().endsWith("." + step.getName())).findFirst();
+            if (!stepClass.isPresent())
                 errors.add("Step '" + step.getName() + "' has invalid step type");
             else {
                 try {
-                    Object stepInstance = AvailableSteps.getStep(step.getName()).getConstructor(Step.class).newInstance(step);
+                    Object stepInstance = Class.forName(stepClass.get()).getConstructor(Step.class).newInstance(step);
                     errors.addAll(Arrays.asList(((nl.arba.integration.execution.steps.Step) stepInstance).validate(step)));
                 }
                 catch (Exception err) {

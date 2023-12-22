@@ -8,6 +8,7 @@ import nl.arba.integration.validation.json.JsonValidator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 
 public class Daemon extends Thread {
     private long interval;
@@ -44,11 +45,12 @@ public class Daemon extends Thread {
         if (steps == null || steps.length == 0)
             errors.add("No steps specified for daemon");
         for (Step step: steps) {
-            if (!Arrays.asList(stepclasses).stream().filter(s -> s.toLowerCase().endsWith("." + step.getName())).findFirst().isPresent())
+            Optional<String> stepClass = Arrays.asList(stepclasses).stream().filter(s -> s.toLowerCase().endsWith("." + step.getName())).findFirst();
+            if (!stepClass.isPresent())
                 errors.add("Step '" + step.getName() + "' has invalid step type");
             else {
                 try {
-                    Object stepInstance = AvailableSteps.getStep(step.getName()).getConstructor(Step.class).newInstance(step);
+                    Object stepInstance = Class.forName(stepClass.get()).getConstructor(Step.class).newInstance(step);
                     errors.addAll(Arrays.asList(((nl.arba.integration.execution.steps.Step) stepInstance).validate(step)));
                 }
                 catch (Exception err) {
