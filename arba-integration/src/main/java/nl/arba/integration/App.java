@@ -29,8 +29,11 @@ public class App {
     public static void main(String[] args) {
         try {
             File[] projects = new File[args.length-1];
-            for (int index = 1; index < args.length; index++)
-                projects[index-1] = new File(args[index]);
+            for (int index = 1; index < args.length; index++) {
+                projects[index - 1] = new File(args[index]);
+                if (!projects[index-1].exists())
+                    System.out.println(projects[index-1] + " not found!");
+            }
             App.start(Integer.parseInt(args[0]), projects, true);
         }
         catch (Exception err) {
