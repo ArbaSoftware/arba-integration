@@ -119,6 +119,7 @@ public class Projects {
         Configuration config = Configuration.create(new ByteArrayInputStream("{}".getBytes()));
         config.setSettings(allsettings);
         config.setApis(apis.toArray(new Api[0]));
+        config.setBeans(beans.toArray(new Bean[0]));
         config.setDaemons(daemons.toArray(new Daemon[0]));
         config.setStepclasses(stepClasses.toArray(new String[0]));
 

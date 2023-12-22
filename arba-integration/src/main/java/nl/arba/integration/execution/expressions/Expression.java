@@ -89,7 +89,20 @@ public class Expression {
                 throw new InvalidExpressionException(expression);
         }
         else if (isBeanCall(context, expression)) {
-            return null;
+            try {
+                String beanName = expression.substring(0, expression.indexOf("."));
+                String functionName = expression.substring(beanName.length() + 1, expression.indexOf("("));
+                Class beanClass = Class.forName(context.getConfiguration().getBean(beanName).getClassname());
+                String parametersExpression = expression.substring(expression.indexOf("(")+1, expression.lastIndexOf(")"));
+                Object[] parameterValues = getParameterValues(context, parametersExpression);
+                Class[] parameterClasses = getParameterClasses(parameterValues);
+                Object bean = beanClass.getConstructor(Context.class).newInstance(context);
+                Method beanMethod = beanClass.getMethod(functionName, parameterClasses);
+                return beanMethod.invoke(bean, parameterValues);
+            }
+            catch (Exception err) {
+                throw new InvalidExpressionException(expression);
+            }
         }
         else if (isObjectMethodCall(context, expression)) {
             return null;

@@ -1,5 +1,6 @@
 package nl.arba.integration.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -30,8 +31,19 @@ public class JsonUtils {
     public static String translate(InputStream source, Map<String,Object> allstylesheets, String stylesheetname) {
         try {
             Map <String, Object> jsonStylesheet = (Map) ((Map) allstylesheets.get("stylesheets")).get(stylesheetname);
-            Map<String, Object> jsonSource = getMapper().readValue(source, Map.class);
-            return getMapper().writeValueAsString(translate(jsonSource, jsonStylesheet));
+            try {
+                Map<String, Object> jsonSource = getMapper().readValue(source, Map.class);
+                return getMapper().writeValueAsString(translate(jsonSource, jsonStylesheet));
+            }
+            catch (JsonProcessingException jpe) {
+                source.reset();
+                Map<String, Object>[] jsonSource = getMapper().readValue(source, Map[].class);
+                Map[] results = new Map[jsonSource.length];
+                for (int index = 0; index < results.length; index++) {
+                    results[index] = translate(jsonSource[index], jsonStylesheet);
+                }
+                return getMapper().writeValueAsString(results);
+            }
         }
         catch (Exception err) {
             return null;

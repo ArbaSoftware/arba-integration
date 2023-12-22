@@ -54,4 +54,8 @@ public class GeneralFunctions {
         Map<String, Object> allstylesheets = context.getJsonStylesheets();
         return JsonUtils.translate(new ByteArrayInputStream(source), allstylesheets, stylesheet);
     }
+
+    public static String translateJson(Context context, HttpResponse source, String stylesheet) throws Exception {
+        return translateJson(context, source.getContent(), stylesheet);
+    }
 }

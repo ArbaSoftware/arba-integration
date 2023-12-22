@@ -1,9 +1,11 @@
 {
   "settings": {
+    "oauth.token.url": "http://192.168.2.74:9443/auth/realms/Arba/protocol/openid-connect/token",
+    "oauth.validation.url": "http://192.168.2.74:9443/auth/realms/Arba/protocol/openid-connect/token/introspect",
     "keycloak.api.url": "http://192.168.2.74:9443/auth/admin/realms/Arba",
     "keycloak.token.url": "http://192.168.2.74:9443/auth/realms/Arba/protocol/openid-connect/token",
-    "keycloak.client.secret": "pXjlhpkKArzAWYGxR4cSPpck1GzmtUbh",
-    "keycloak.client.id": "ada",
+    "oauth.client.secret": "pXjlhpkKArzAWYGxR4cSPpck1GzmtUbh",
+    "oauth.client.id": "ada",
     "keycloak.api.user": "api_user",
     "keycloak.api.password": "#Kc@q}LG+L8R6Jv"
   },
@@ -23,6 +25,12 @@
     "nl.arba.integration.execution.steps.TranslateJson",
     "nl.arba.integration.execution.steps.AddToJsonArray"
   ],
+  "beans": [
+    {
+      "classname": "nl.arba.integration.execution.beans.OAuth",
+      "name": "OAuth"
+    }
+  ],
   "apis": [
     {
       "uripattern": "/auth/users",
@@ -34,70 +42,30 @@
         {
           "name": "property",
           "settings": {
-            "name": "api.token.request",
-            "value": "new HttpRequest('post','{keycloak.token.url}')"
+            "name": "apitoken",
+            "value": "OAuth.getToken({keycloak.api.user},{keycloak.api.password})"
           }
         },
         {
           "name": "property",
           "settings": {
-            "name": "api.token.request.body",
-            "value": "new JsonObject()"
+            "name": "usersrequest",
+            "value": "new HttpRequest('get','{keycloak.api.url}/users')"
           }
         },
         {
-          "name": "jsonproperty",
+          "name": "header",
           "settings": {
-            "name": "api.token.request.body",
-            "property": "client_secret",
-            "value": "{keycloak.client.secret}"
-          }
-        },
-        {
-          "name": "jsonproperty",
-          "settings": {
-            "name": "api.token.request.body",
-            "property": "client_id",
-            "value": "{keycloak.client.id}"
-          }
-        },
-        {
-          "name": "jsonproperty",
-          "settings": {
-            "name": "api.token.request.body",
-            "property": "grant_type",
-            "value": "'password'"
-          }
-        },
-        {
-          "name": "jsonproperty",
-          "settings": {
-            "name": "api.token.request.body",
-            "property": "username",
-            "value": "{keycloak.api.user}"
-          }
-        },
-        {
-          "name": "jsonproperty",
-          "settings": {
-            "name": "api.token.request.body",
-            "property": "password",
-            "value": "{keycloak.api.password}"
-          }
-        },
-        {
-          "name": "content",
-          "settings": {
-            "property": "api.token.request",
-            "contenttype": "application/x-www-form-urlencoded",
-            "content": "{api.token.request.body}"
+            "property": "usersrequest",
+            "name": "Authorization",
+            "value": "'Bearer {apitoken}'"
           }
         },
         {
           "name": "httpcall",
           "settings": {
-            "request": "api.token.request",
-            "response": "api.token.response"
+            "request": "usersrequest",
+            "response": "usersresponse"
           }
         },
         {
@@ -111,8 +79,9 @@
           "name": "content",
           "settings": {
             "property": "api.response",
-            "contenttype": "text/json",
-            "content": "{api.token.response}"
+            "contenttype": "application/json",
+            "content2": "{usersresponse}",
+            "content": "translateJson({usersresponse}, 'users')"
           }
         }
       ]

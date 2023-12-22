@@ -1,23 +1,10 @@
 {
   "stylesheets": {
-    "donatievoorstel": {
-      "variables": {
-        "doel": {
-          "value": "string($.doel)"
-        },
-        "bedrag": {
-          "value": "$.bedrag"
-        },
-        "goedkeurder": {
-          "value": "string($.goedkeurder)"
-        },
-        "akkoord": {
-          "value": "$.akkoord"
-        },
-        "workflowtype": {
-            "value": "string('donatievoorstel')"
-        }
-      }
+    "users": {
+      "id": "string($.id)",
+      "lastname": "string($.lastName)",
+      "firstname": "string($.firstName)",
+      "mailaddress": "string($.email)"
     }
   }
 }

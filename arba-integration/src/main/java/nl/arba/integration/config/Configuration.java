@@ -78,6 +78,13 @@ public class Configuration {
         return beans;
     }
 
+    public Bean getBean(String name) {
+        if (beans == null)
+            return null;
+        else
+            return Arrays.asList(beans).stream().filter(b -> b.getName().equals(name)).findFirst().get();
+    }
+
     public boolean hasBean(String name) {
         if (beans == null)
             return false;
