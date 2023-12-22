@@ -43,14 +43,14 @@ public class Api {
         return steps;
     }
 
-    public String[] validate() {
+    public String[] validate(String[] stepclasses) {
         ArrayList<String> errors = new ArrayList<>();
         if (methods.isEmpty())
             errors.add("No method specified for api");
         if (steps == null || steps.length == 0)
             errors.add("No steps specified for api");
         for (Step step: getSteps()) {
-            if (!AvailableSteps.isValidStep(step.getName()))
+            if (!Arrays.asList(stepclasses).stream().filter(s -> s.toLowerCase().endsWith("." + step.getName())).findFirst().isPresent())
                 errors.add("Step '" + step.getName() + "' has invalid step type");
             else {
                 try {
@@ -60,7 +60,6 @@ public class Api {
                 catch (Exception err) {
                     errors.add("Unexpected error on instantiating step " + step.getName() + " : " + err.getMessage());
                 }
-
             }
 
         }

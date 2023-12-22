@@ -39,12 +39,12 @@ public class Daemon extends Thread {
         }
     }
 
-    public String[] validate() {
+    public String[] validate(String[] stepclasses) {
         ArrayList<String> errors = new ArrayList<>();
         if (steps == null || steps.length == 0)
             errors.add("No steps specified for daemon");
         for (Step step: steps) {
-            if (!AvailableSteps.isValidStep(step.getName()))
+            if (!Arrays.asList(stepclasses).stream().filter(s -> s.toLowerCase().endsWith("." + step.getName())).findFirst().isPresent())
                 errors.add("Step '" + step.getName() + "' has invalid step type");
             else {
                 try {

@@ -49,7 +49,7 @@ public class Configuration {
         if (getApis() == null || getApis().length == 0)
             errors.add("No api's defined");
         for (Api api: getApis()) {
-            errors.addAll(Arrays.asList(api.validate()));
+            errors.addAll(Arrays.asList(api.validate(getStepClasses())));
         }
         return errors.toArray(new String[errors.size()]);
     }
