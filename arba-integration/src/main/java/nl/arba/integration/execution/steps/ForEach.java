@@ -5,6 +5,7 @@ import nl.arba.integration.execution.Context;
 import nl.arba.integration.model.HttpResponse;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 public class ForEach extends Step {
@@ -37,7 +38,9 @@ public class ForEach extends Step {
         Step[] executeSteps = new Step[steps.length];
         for (int index = 0; index < executeSteps.length; index++) {
             try {
-                executeSteps[index] = (Step) AvailableSteps.getStep(steps[index].getName()).getConstructor(nl.arba.integration.config.Step.class).newInstance(steps[index]);
+                final String stepName = steps[index].getName();
+                String stepClass = Arrays.asList(context.getConfiguration().getStepClasses()).stream().filter(s -> s.toLowerCase().endsWith("." + stepName)).findFirst().get();
+                executeSteps[index] = (Step) Class.forName(stepClass).getConstructor(nl.arba.integration.config.Step.class).newInstance(steps[index]);
             }
             catch (Exception err) {}
         }

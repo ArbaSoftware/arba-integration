@@ -9,10 +9,7 @@ import nl.arba.integration.model.HttpMethod;
 import nl.arba.integration.model.HttpRequest;
 import nl.arba.integration.utils.PatternUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class Api {
@@ -43,7 +40,8 @@ public class Api {
         steps = new ArrayList<>();
         for (nl.arba.integration.config.Step step : config.getSteps()) {
             try {
-                Step impl = (Step) AvailableSteps.getStep(step.getName()).getConstructor(step.getClass()).newInstance(step);
+                String stepClass = Arrays.asList(configuration.getStepClasses()).stream().filter(s -> s.toLowerCase().endsWith("." + step.getName())).findFirst().get();
+                Step impl = (Step) Class.forName(stepClass).getConstructor(step.getClass()).newInstance(step);
                 steps.add(impl);
             }
             catch (Exception err) {
