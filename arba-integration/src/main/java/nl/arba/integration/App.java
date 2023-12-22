@@ -26,22 +26,17 @@ public class App {
     private static Server server;
     private static Daemon[] daemons;
 
-    /*
     public static void main(String[] args) {
         try {
-            Configuration config = null;
-            if (args.length > 0)
-                start(new FileInputStream(args[0]));
-            else if (System.getProperty("config.resource") != null)
-                start(App.class.getResourceAsStream(System.getProperty("config.resource")));
-            else
-                throw new Exception("No configuration specified");
+            File[] projects = new File[args.length-1];
+            for (int index = 1; index < args.length; index++)
+                projects[index-1] = new File(args[index]);
+            App.start(Integer.parseInt(args[0]), projects, true);
         }
         catch (Exception err) {
             err.printStackTrace();
         }
     }
-     */
 
     /*
     public static void start(int port, File project) {
