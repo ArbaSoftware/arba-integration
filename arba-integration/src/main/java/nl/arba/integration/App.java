@@ -53,8 +53,8 @@ public class App {
                 int index = 0;
                 for (nl.arba.integration.config.Daemon daemon : configuredDaemons) {
                     Daemon newDaemon = new Daemon();
+                    newDaemon.setSteps(daemon.getSteps(), allprojects.getConfiguration().getStepClasses());
                     newDaemon.setInterval(daemon.getInterval());
-                    newDaemon.setSteps(daemon.getSteps());
                     String[] daemonvalidationErrors = newDaemon.validate(allprojects.getConfiguration().getStepClasses());
                     if (daemonvalidationErrors.length == 0) {
                         newDaemon.setConfiguration(allprojects.getConfiguration());

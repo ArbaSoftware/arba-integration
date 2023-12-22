@@ -26,12 +26,13 @@ public class Daemon extends Thread {
         this.interval = interval;
     }
 
-    public void setSteps(Step[] steps) {
+    public void setSteps(Step[] steps, String[] stepclasses) {
         this.steps = steps;
         stepsToExecute = new ArrayList<>();
         for (Step step: steps) {
             try {
-                nl.arba.integration.execution.steps.Step impl = (nl.arba.integration.execution.steps.Step) AvailableSteps.getStep(step.getName()).getConstructor(step.getClass()).newInstance(step);
+                String stepClass = Arrays.asList(stepclasses).stream().filter(s -> s.toLowerCase().endsWith("." + step.getName())).findFirst().get();
+                nl.arba.integration.execution.steps.Step impl = (nl.arba.integration.execution.steps.Step) Class.forName(stepClass).getConstructor(step.getClass()).newInstance(step);
                 stepsToExecute.add(impl);
             }
             catch (Exception err) {
