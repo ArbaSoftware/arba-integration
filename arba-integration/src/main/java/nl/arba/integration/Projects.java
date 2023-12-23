@@ -107,7 +107,8 @@ public class Projects {
             }
 
             ZipEntry stylesheetsEntry = projectzip.getEntry("jsonstylesheets.json");
-            Map <String, Object> projectstylesheets = JsonUtils.getMapper().readValue(projectzip.getInputStream(stylesheetsEntry), Map.class);
+            Map <String, Object> projectinput = JsonUtils.getMapper().readValue(projectzip.getInputStream(stylesheetsEntry), Map.class);
+            final Map <String,Object> projectstylesheets = (Map<String,Object>) projectinput.get("stylesheets");
             Optional<String> existing = projectstylesheets.keySet().stream().filter(k -> stylesheets.containsKey(k)).findFirst();
             if (existing.isPresent()) {
                 throw new IOException("Multiple stylesheets found with same name (" + existing.get() + ")");

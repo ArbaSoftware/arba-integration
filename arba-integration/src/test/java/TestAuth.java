@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -90,6 +91,17 @@ public class TestAuth {
         HttpGet get = new HttpGet("http://localhost:8180/auth/users");
         get.addHeader("Authorization", "Bearer " + token);
         CloseableHttpResponse response= httpClient.execute(get);
+        System.out.println(response.getCode());
+        System.out.println(StreamUtils.streamToString(response.getEntity().getContent()));
+    }
+
+    @Test
+    public void test_login() throws Exception {
+        HttpPost post = new HttpPost("http://localhost:8180/auth/login");
+        HashMap<String,String> body = new HashMap<>();
+        body.put("user", "arjan");
+        body.put("password", "hemertje");
+        CloseableHttpResponse response = httpClient.execute(post);
         System.out.println(response.getCode());
         System.out.println(StreamUtils.streamToString(response.getEntity().getContent()));
     }

@@ -85,6 +85,44 @@
           }
         }
       ]
+    },
+    {
+      "uripattern": "/auth/login",
+      "authorization": "none",
+      "methods": [
+        "post"
+      ],
+      "steps": [
+        {
+          "name": "property",
+          "settings": {
+            "name": "requestuser",
+            "value": "{api.request.body.user}"
+          }
+        },
+        {
+          "name": "property",
+          "settings": {
+            "name": "requestpassword",
+            "value": "{api.request.body.password}"
+          }
+        },
+        {
+          "name": "property",
+          "settings": {
+            "name": "api.response",
+            "value": "new HttpResponse(200)"
+          }
+        },
+        {
+          "name": "content",
+          "settings": {
+            "property": "api.response",
+            "contenttype": "text/text",
+            "content": "'OK'"
+          }
+        }
+      ]
     }
   ],
   "daemons": []
