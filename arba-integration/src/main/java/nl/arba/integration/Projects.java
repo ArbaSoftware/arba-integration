@@ -110,7 +110,7 @@ public class Projects {
             Map <String, Object> projectstylesheets = JsonUtils.getMapper().readValue(projectzip.getInputStream(stylesheetsEntry), Map.class);
             Optional<String> existing = projectstylesheets.keySet().stream().filter(k -> stylesheets.containsKey(k)).findFirst();
             if (existing.isPresent()) {
-                throw new IOException("Multiple stylesheets found with same name");
+                throw new IOException("Multiple stylesheets found with same name (" + existing.get() + ")");
             }
             projectstylesheets.keySet().stream().forEach(k -> stylesheets.put(k, projectstylesheets.get(k)));
         }
