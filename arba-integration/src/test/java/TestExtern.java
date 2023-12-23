@@ -160,4 +160,14 @@ public class TestExtern {
         tempFile.delete();
         App.stop();
     }
+
+    @Test
+    public void testServer() throws Exception {
+        HttpGet get = new HttpGet("http://192.168.2.74:9602/administratie/donatieverzoek");
+        get.addHeader("Authorization", "Bearer "+ token);
+        CloseableHttpResponse response = httpClient.execute(get);
+        System.out.println(response.getCode());
+        System.out.println(StreamUtils.streamToString(response.getEntity().getContent()));
+    }
+
 }
