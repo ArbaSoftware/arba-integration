@@ -9,6 +9,7 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.junit.Before;
 import org.junit.Test;
@@ -101,8 +102,9 @@ public class TestAuth {
         HashMap<String,String> body = new HashMap<>();
         body.put("user", "arjan");
         body.put("password", "hemertje");
+        post.setEntity(new StringEntity(new ObjectMapper().writeValueAsString(body)));
         CloseableHttpResponse response = httpClient.execute(post);
         System.out.println(response.getCode());
-        System.out.println(StreamUtils.streamToString(response.getEntity().getContent()));
+        System.out.println(response.getHeader("Authorization"));
     }
 }

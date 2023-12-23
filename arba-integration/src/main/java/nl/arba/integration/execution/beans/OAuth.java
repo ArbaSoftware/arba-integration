@@ -24,9 +24,13 @@ public class OAuth {
     }
 
     public String getToken(String username, String password) throws Exception {
+        return getToken(username, password, true);
+    }
+
+    private String getToken(String username, String password, boolean cached) throws Exception {
         String cacheKey = username + ":"+ password;
         CloseableHttpClient client = HttpClients.createDefault();
-        if (tokenCache.containsKey(cacheKey)) {
+        if (cached && tokenCache.containsKey(cacheKey)) {
             //Validate token
             HttpPost post = new HttpPost((String) context.getConfiguration().getSetting("oauth.validation.url"));
             String token = tokenCache.get(cacheKey);
@@ -50,8 +54,13 @@ public class OAuth {
             post.setEntity(new UrlEncodedFormEntity(request));
             CloseableHttpResponse response = client.execute(post);
             String token = (String) JsonUtils.getMapper().readValue(response.getEntity().getContent(), Map.class).get("access_token");
-            tokenCache.put(cacheKey, token);
+            if (cached)
+                tokenCache.put(cacheKey, token);
             return token;
         }
+    }
+
+    public String getTokenHeader(String username, String password) throws Exception {
+        return "Bearer " + getToken(username, password, false);
     }
 }

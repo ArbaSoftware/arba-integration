@@ -3,6 +3,7 @@ package nl.arba.integration.execution.steps;
 import nl.arba.integration.execution.Context;
 import nl.arba.integration.execution.expressions.InvalidExpressionException;
 import nl.arba.integration.model.HttpRequest;
+import nl.arba.integration.model.HttpResponse;
 
 import java.util.ArrayList;
 
@@ -26,7 +27,13 @@ public class Header extends Step {
                 if (headerValue != null)
                     ((HttpRequest) propertyValue).setHeader(name, headerValue);
                 return true;
-            } else
+            }
+            else if (propertyValue instanceof HttpResponse) {
+                String headerValue = (String) context.evaluate(valueExpression);
+                ((HttpResponse) propertyValue).addHeader(name, (String) context.evaluate(valueExpression));
+                return true;
+            }
+            else
                 return false;
         }
         catch (InvalidExpressionException e) {

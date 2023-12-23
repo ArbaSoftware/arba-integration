@@ -1,7 +1,10 @@
 package nl.arba.integration.model;
 
 import jakarta.servlet.http.HttpServletRequest;
+import nl.arba.integration.utils.StreamUtils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,6 +66,12 @@ public class HttpRequest {
         while (headerNames.hasMoreElements()) {
             String header = headerNames.nextElement();
             result.setHeader(header, request.getHeader(header));
+        }
+        if (request.getMethod().equalsIgnoreCase("post")) {
+            try (InputStream is = request.getInputStream()) {
+                result.setPostBody(StreamUtils.streamToBytes(is));
+            }
+            catch (Exception err) {}
         }
         return result;
     }

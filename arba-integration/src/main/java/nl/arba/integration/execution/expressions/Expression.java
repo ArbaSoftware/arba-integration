@@ -2,10 +2,7 @@ package nl.arba.integration.execution.expressions;
 
 import netscape.javascript.JSObject;
 import nl.arba.integration.execution.Context;
-import nl.arba.integration.model.ArrayValue;
-import nl.arba.integration.model.HttpResponse;
-import nl.arba.integration.model.JsonArray;
-import nl.arba.integration.model.JsonObject;
+import nl.arba.integration.model.*;
 import nl.arba.integration.utils.JsonUtils;
 
 import java.lang.reflect.Constructor;
@@ -49,8 +46,25 @@ public class Expression {
             }
             else if (variableName.contains(".")) {
                 String[] parts = variableName.split(Pattern.quote("."));
-                Object currentValue = evaluate(context, "{" + parts[0] + "}");
-                for (int index = 1; index < parts.length; index++) {
+                //First check on variable or settings with . in name
+                String currentName = "";
+                Object currentValue = null;
+                int startindex = 0;
+                for (int index = 0; index < parts.length; index++) {
+                    currentName += (index == 0 ? "": ".") + parts[index];
+                    if (context.hasVariable(currentName)) {
+                        currentValue = context.getVariable(currentName);
+                        startindex = (index+1);
+                        break;
+                    }
+                    else if (context.getConfiguration().hasSetting(currentName)) {
+                        currentValue = context.getConfiguration().getSetting(currentName);
+                        startindex = (index+1);
+                    }
+                }
+                if (currentValue == null)
+                    currentValue = evaluate(context, "{" + parts[0] + "}");
+                for (int index = startindex; index < parts.length; index++) {
                     if (currentValue instanceof JsonObject)
                         currentValue = ((JsonObject) currentValue).getProperty(parts[index]);
                     else if (currentValue instanceof Map)
@@ -60,6 +74,19 @@ public class Expression {
                             byte[] content = ((HttpResponse) currentValue).getContent();
                             Map jsonInput = JsonUtils.getMapper().readValue(((HttpResponse) currentValue).getContent(), Map.class);
                             currentValue = jsonInput.get(parts[index]);
+                        }
+                        catch (Exception err) {
+                            throw new InvalidExpressionException(expression);
+                        }
+                    }
+                    else if (currentValue instanceof HttpRequest && isJsonPostRequest((HttpRequest) currentValue)) {
+                        try {
+                            byte[] content = ((HttpRequest) currentValue).getPostBody();
+                            Map jsonInput = JsonUtils.getMapper().readValue(content, Map.class);
+                            if (parts[index].equals("body"))
+                                currentValue = JsonObject.fromMap(jsonInput);
+                            else
+                                throw new InvalidExpressionException(expression);
                         }
                         catch (Exception err) {
                             throw new InvalidExpressionException(expression);
@@ -442,6 +469,20 @@ public class Expression {
                 return false;
             else {
                 return true;
+            }
+        }
+        else
+            return false;
+    }
+
+    private static boolean isJsonPostRequest(HttpRequest request) {
+        if (request.getMethod().equals(HttpMethod.POST)) {
+            try {
+                JsonUtils.getMapper().readValue(request.getPostBody(), Map.class);
+                return true;
+            }
+            catch (Exception err) {
+                return false;
             }
         }
         else
