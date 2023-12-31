@@ -106,5 +106,6 @@ public class TestAuth {
         CloseableHttpResponse response = httpClient.execute(post);
         System.out.println(response.getCode());
         System.out.println(response.getHeader("Authorization"));
+        System.out.println(StreamUtils.streamToString(response.getEntity().getContent()));
     }
 }

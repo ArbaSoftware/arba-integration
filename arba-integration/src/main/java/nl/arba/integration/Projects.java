@@ -48,6 +48,7 @@ public class Projects {
         ArrayList<Api> apis = new ArrayList<>();
         HashMap<String, Map> schemas = new HashMap<>();
         HashMap<String, Object> stylesheets = new HashMap<>();
+        stylesheets.put("stylesheets", new HashMap<String,Object>());
         HashMap<String, Object> allsettings = new HashMap<>();
         ArrayList<String> stepClasses = new ArrayList<>();
         ArrayList<Daemon> daemons = new ArrayList<>();
@@ -113,7 +114,9 @@ public class Projects {
             if (existing.isPresent()) {
                 throw new IOException("Multiple stylesheets found with same name (" + existing.get() + ")");
             }
-            projectstylesheets.keySet().stream().forEach(k -> stylesheets.put(k, projectstylesheets.get(k)));
+            for (String key: projectstylesheets.keySet()) {
+                ((Map) stylesheets.get("stylesheets")).put(key, projectstylesheets.get(key));
+            }
         }
 
         //Collect configurations

@@ -8,12 +8,14 @@ import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.utils.Base64;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class OAuth {
     private Context context;
@@ -62,5 +64,10 @@ public class OAuth {
 
     public String getTokenHeader(String username, String password) throws Exception {
         return "Bearer " + getToken(username, password, false);
+    }
+
+    public String getUserFromToken(String token) throws Exception {
+        Map tokenInfo = JsonUtils.getMapper().readValue(Base64.decodeBase64(token.split(Pattern.quote("."))[1]), Map.class);
+        return (String) tokenInfo.get("sub");
     }
 }

@@ -7,6 +7,7 @@ import nl.arba.integration.config.Configuration;
 import nl.arba.integration.execution.Api;
 import nl.arba.integration.execution.Context;
 import nl.arba.integration.model.HttpMethod;
+import nl.arba.integration.model.HttpRequest;
 import nl.arba.integration.model.HttpResponse;
 import nl.arba.integration.utils.HttpUtils;
 import nl.arba.integration.utils.StreamUtils;
@@ -77,7 +78,7 @@ public class ApisServlet extends HttpServlet {
             else {
                 Context context = Context.create(config, jsonValidator, jsonStylesheets);
                 context.setVariable(Context.API_REQUEST,handler.createSource(request));
-                context.setVariable(Context.API_REQUEST_BODY, StreamUtils.streamToBytes(request.getInputStream()) );
+                context.setVariable(Context.API_REQUEST_BODY, ((HttpRequest) context.getVariable(Context.API_REQUEST)).getPostBody() );
                 boolean result = handler.execute(request, response, context);
                 if (result) {
                     HttpResponse responze = (HttpResponse) context.getVariable(Context.API_RESPONSE);
