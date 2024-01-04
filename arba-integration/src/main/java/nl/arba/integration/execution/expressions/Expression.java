@@ -195,6 +195,7 @@ public class Expression {
                                 Method m = currentValue.getClass().getMethod(currentFunctionName, parameterClasses);
                                 currentValue = m.invoke(currentValue, parameterValues);
                                 currentExpression = "";
+                                parameterExpression = "";
                             }
                             catch (Exception err) {
                                 throw new InvalidExpressionException(expression);

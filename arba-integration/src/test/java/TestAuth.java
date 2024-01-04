@@ -95,6 +95,14 @@ public class TestAuth {
         System.out.println(response.getCode());
         System.out.println(StreamUtils.streamToString(response.getEntity().getContent()));
     }
+    @Test
+    public void test_get_user() throws Exception {
+        HttpGet get = new HttpGet("http://localhost:8180/auth/user/8191c757-1dd2-4a73-9390-25d68f6b76ee");
+        get.addHeader("Authorization", "Bearer " + token);
+        CloseableHttpResponse response= httpClient.execute(get);
+        System.out.println(response.getCode());
+        System.out.println(StreamUtils.streamToString(response.getEntity().getContent()));
+    }
 
     @Test
     public void test_login() throws Exception {

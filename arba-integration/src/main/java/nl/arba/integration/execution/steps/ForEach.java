@@ -3,6 +3,7 @@ package nl.arba.integration.execution.steps;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.arba.integration.execution.Context;
 import nl.arba.integration.model.HttpResponse;
+import nl.arba.integration.model.JsonArray;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +35,10 @@ public class ForEach extends Step {
                 }
                 catch (Exception err) {}
             }
+        }
+        else if (sourceValue instanceof JsonArray) {
+            JsonArray array = (JsonArray) sourceValue;
+            items.addAll(array.getItems());
         }
         Step[] executeSteps = new Step[steps.length];
         for (int index = 0; index < executeSteps.length; index++) {

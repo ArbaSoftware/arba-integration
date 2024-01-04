@@ -87,12 +87,41 @@
       ]
     },
     {
-      "uripattern": "/auth/login",
+      "uripattern": "/auth/user/{id}",
       "authorization": "none",
       "methods": [
-        "post"
+        "get"
       ],
       "steps": [
+        {
+          "name": "property",
+          "settings": {
+            "name": "apitoken",
+            "value": "OAuth.getToken({keycloak.api.user},{keycloak.api.password})"
+          }
+        },
+        {
+          "name": "property",
+          "settings": {
+            "name": "userrequest",
+            "value": "new HttpRequest('get','{keycloak.api.url}/users/{id}')"
+          }
+        },
+        {
+          "name": "header",
+          "settings": {
+            "property": "userrequest",
+            "name": "Authorization",
+            "value": "'Bearer {apitoken}'"
+          }
+        },
+        {
+          "name": "httpcall",
+          "settings": {
+            "request": "userrequest",
+            "response": "userresponse"
+          }
+        },
         {
           "name": "property",
           "settings": {
@@ -101,26 +130,11 @@
           }
         },
         {
-          "name": "property",
-          "settings": {
-            "name": "tokenheader",
-            "value": "OAuth.getTokenHeader({api.request.body.user},{api.request.body.password})"
-          }
-        },
-        {
-          "name": "header",
-          "settings": {
-            "property": "api.response",
-            "name": "Authorization",
-            "value": "{tokenheader}"
-          }
-        },
-        {
           "name": "content",
           "settings": {
             "property": "api.response",
-            "contenttype": "text/text",
-            "content": "'OK'"
+            "contenttype": "application/json",
+            "content": "{userresponse}"
           }
         }
       ]

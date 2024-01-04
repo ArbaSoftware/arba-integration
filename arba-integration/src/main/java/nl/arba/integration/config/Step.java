@@ -10,6 +10,8 @@ public class Step {
     private Map<String, Object> settings;
     private Step[] subSteps;
 
+    private Step[] elseSteps;
+
     public void setName(String name) {
         this.name = name;
     }
@@ -40,6 +42,14 @@ public class Step {
 
     public Step[] getSteps() {
         return subSteps;
+    }
+
+    public void setElsesteps(Step[] steps) {
+        elseSteps = steps;
+    }
+
+    public Step[] getElseSteps() {
+        return elseSteps;
     }
 
     public int paint(Graphics g, int x, int y) {

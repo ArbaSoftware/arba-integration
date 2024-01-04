@@ -46,6 +46,7 @@ public class HttpCall extends Step {
             try {
                 CloseableHttpResponse response = client.execute(get);
                 context.setVariable(responseVariable.equals("api.response")? Context.API_RESPONSE: responseVariable, HttpResponse.from(response));
+                System.out.println(new String(((HttpResponse) context.getVariable(responseVariable)).getContent()));
                 return true;
             }
             catch (Exception err) {
