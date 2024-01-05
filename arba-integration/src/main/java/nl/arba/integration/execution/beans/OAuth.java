@@ -26,7 +26,7 @@ public class OAuth {
     }
 
     public String getToken(String username, String password) throws Exception {
-        return getToken(username, password, true);
+        return getToken(username, password, false);
     }
 
     private String getToken(String username, String password, boolean cached) throws Exception {
