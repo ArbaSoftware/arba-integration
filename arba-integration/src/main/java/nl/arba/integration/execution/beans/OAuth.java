@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 public class OAuth {
     private Context context;
     private static HashMap<String,String> tokenCache = new HashMap<>();
+    private static HashMap<String,String> refreshtokenCache = new HashMap<>();
 
     public OAuth(Context context) {
         this.context = context;
@@ -44,7 +45,23 @@ public class OAuth {
             request.add(new BasicNameValuePair("client_id", (String) context.getConfiguration().getSetting("oauth.client.id")));
             post.setEntity(new UrlEncodedFormEntity(request));
             CloseableHttpResponse response = client.execute(post);
-            System.out.println("Cache response: " + StreamUtils.streamToString(response.getEntity().getContent()));
+            Map jsonResponse = JsonUtils.getMapper().readValue(response.getEntity().getContent(), Map.class);
+            if (jsonResponse.containsKey("active") && jsonResponse.get("active").equals(Boolean.FALSE)) {
+                //Refresh token
+                System.out.println("Refreshing token");
+                post = new HttpPost((String) context.getConfiguration().getSetting("oauth.token.url"));
+                request = new ArrayList<>();
+                request.add(new BasicNameValuePair("client_secret", (String) context.getConfiguration().getSetting("oauth.client.secret")));
+                request.add(new BasicNameValuePair("client_id", (String) context.getConfiguration().getSetting("oauth.client.id")));
+                request.add(new BasicNameValuePair("grant_type", "refresh_token"));
+                request.add(new BasicNameValuePair("refresh_token", refreshtokenCache.get(cacheKey)));
+                post.setEntity(new UrlEncodedFormEntity(request));
+                CloseableHttpResponse refreshresponse = client.execute(post);
+                jsonResponse = JsonUtils.getMapper().readValue(refreshresponse.getEntity().getContent(), Map.class);
+                token = jsonResponse.get("access_token").toString();
+                refreshtokenCache.put(cacheKey, jsonResponse.get("refresh_token").toString());
+                tokenCache.put(cacheKey, token);
+            }
             return token;
         }
         else {
@@ -57,9 +74,12 @@ public class OAuth {
             request.add(new BasicNameValuePair("password", password));
             post.setEntity(new UrlEncodedFormEntity(request));
             CloseableHttpResponse response = client.execute(post);
-            String token = (String) JsonUtils.getMapper().readValue(response.getEntity().getContent(), Map.class).get("access_token");
-            if (cached)
+            Map jsonResponse = JsonUtils.getMapper().readValue(response.getEntity().getContent(), Map.class);
+            String token = (String) jsonResponse.get("access_token");
+            if (cached) {
                 tokenCache.put(cacheKey, token);
+                refreshtokenCache.put(cacheKey, jsonResponse.get("refresh_token").toString());
+            }
             return token;
         }
     }
