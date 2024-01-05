@@ -30,6 +30,7 @@ public class OAuth {
     }
 
     private String getToken(String username, String password, boolean cached) throws Exception {
+        System.out.println("OAuth.getToken: " + username + "/"+ password);
         String cacheKey = username + ":"+ password;
         CloseableHttpClient client = HttpClients.createDefault();
         if (cached && tokenCache.containsKey(cacheKey)) {
