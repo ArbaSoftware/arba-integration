@@ -26,7 +26,7 @@ public class OAuth {
     }
 
     public String getToken(String username, String password) throws Exception {
-        return getToken(username, password, false);
+        return getToken(username, password, true);
     }
 
     private String getToken(String username, String password, boolean cached) throws Exception {
@@ -44,6 +44,7 @@ public class OAuth {
             request.add(new BasicNameValuePair("client_id", (String) context.getConfiguration().getSetting("oauth.client.id")));
             post.setEntity(new UrlEncodedFormEntity(request));
             CloseableHttpResponse response = client.execute(post);
+            System.out.println("Cache response: " + StreamUtils.streamToString(response.getEntity().getContent()));
             return token;
         }
         else {
