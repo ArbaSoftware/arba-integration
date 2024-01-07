@@ -24,6 +24,8 @@ public class JsonObject {
 
     public void setProperty(String propertyname, Integer value) {properties.put(propertyname, value);}
 
+    public void setProperty(String propertyname, Boolean value) {properties.put(propertyname, value);}
+
     public boolean hasProperty(String name) {
         return properties.containsKey(name);
     }

@@ -66,6 +66,8 @@ public class JsonProperty extends Step {
                 }
             } else if (newValue instanceof Integer) {
                 jsonObject.setProperty(propertyName, (Integer) newValue);
+            } else if (newValue instanceof Boolean) {
+                jsonObject.setProperty(propertyName, (Boolean) newValue);
             }
 
             return true;
