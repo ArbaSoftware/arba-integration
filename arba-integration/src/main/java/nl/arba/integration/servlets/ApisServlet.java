@@ -79,6 +79,8 @@ public class ApisServlet extends HttpServlet {
                 Context context = Context.create(config, jsonValidator, jsonStylesheets);
                 context.setVariable(Context.API_REQUEST,handler.createSource(request));
                 context.setVariable(Context.API_REQUEST_BODY, ((HttpRequest) context.getVariable(Context.API_REQUEST)).getPostBody() );
+                Map<String, String> urlParameters = handler.readParametersFromUrl(uri);
+                urlParameters.keySet().stream().forEach(k -> context.setVariable(k, urlParameters.get(k)));
                 boolean result = handler.execute(request, response, context);
                 if (result) {
                     HttpResponse responze = (HttpResponse) context.getVariable(Context.API_RESPONSE);

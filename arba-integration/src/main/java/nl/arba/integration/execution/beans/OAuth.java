@@ -1,6 +1,7 @@
 package nl.arba.integration.execution.beans;
 
 import nl.arba.integration.execution.Context;
+import nl.arba.integration.model.HttpRequest;
 import nl.arba.integration.utils.JsonUtils;
 import nl.arba.integration.utils.StreamUtils;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
@@ -86,6 +87,10 @@ public class OAuth {
 
     public String getTokenHeader(String username, String password) throws Exception {
         return "Bearer " + getToken(username, password, false);
+    }
+
+    public String getTokenFromHeader(HttpRequest request) {
+        return request.getHeaders().get("Authorization").substring("Bearer ".length());
     }
 
     public String getUserFromToken(String token) throws Exception {

@@ -71,7 +71,7 @@ public class HttpCall extends Step {
                 }
                 catch (Exception err) {}
             }
-            else if ("text/json".equals(request.getContentType())) {
+            else if ("text/json".equals(request.getContentType()) || "application/json".equals(request.getContentType())) {
                 post.setEntity(new ByteArrayEntity(request.getPostBody(), ContentType.APPLICATION_JSON, false));
             }
             try {

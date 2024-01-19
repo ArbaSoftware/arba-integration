@@ -34,7 +34,10 @@ public class JsonArray implements ArrayValue {
     public JsonArray filter(String property, String operator, String value) {
         JsonArray array = new JsonArray();
         for (JsonObject item: items) {
-            if (item.hasProperty(property) && item.getProperty(property) != null && item.getProperty(property).equals(value)) {
+            if (operator.equals("==") && item.hasProperty(property) && item.getProperty(property) != null && item.getProperty(property).equals(value)) {
+                array.add(item);
+            }
+            else if (operator.equals("<>") && item.hasProperty(property) && item.getProperty(property) != null && !item.getProperty(property).equals(value)) {
                 array.add(item);
             }
             else {
