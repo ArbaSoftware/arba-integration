@@ -138,6 +138,73 @@
           }
         }
       ]
+    },
+    {
+      "uripattern": "/auth/client/{id}/roles",
+      "authorization": "none",
+      "methods": [
+        "get"
+      ],
+      "steps": [
+        {
+          "name": "property",
+          "settings": {
+            "name": "apitoken",
+            "value": "OAuth.getToken({keycloak.api.user},{keycloak.api.password})"
+          }
+        },
+        {
+          "name": "property",
+          "settings": {
+            "name": "clientsrequest",
+            "value": "new HttpRequest('get','{keycloak.api.url}/clients')"
+          }
+        },
+        {
+          "name": "header",
+          "settings": {
+            "property": "clientsrequest",
+            "name": "Authorization",
+            "value": "'Bearer {apitoken}'"
+          }
+        },
+        {
+          "name": "httpcall",
+          "settings": {
+            "request": "clientsrequest",
+            "response": "clientsresponse"
+          }
+        },
+        {
+          "name": "property",
+          "settings": {
+            "name": "clients",
+            "value": "new JsonArray({clientsresponse})"
+          }
+        },
+        {
+          "name": "property",
+          "settings": {
+            "name": "clientId",
+            "value": "{clients}.filter('clientId', '==', '{id}')"
+          }
+        },
+        {
+          "name": "property",
+          "settings": {
+            "name": "api.response",
+            "value": "new HttpResponse(200)"
+          }
+        },
+        {
+          "name": "content",
+          "settings": {
+            "property": "api.response",
+            "contenttype": "application/json",
+            "content": "{clientsresponse}"
+          }
+        }
+      ]
     }
   ],
   "daemons": []

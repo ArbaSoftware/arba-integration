@@ -60,6 +60,7 @@ public class HttpCall extends Step {
             for (String header: headers.keySet()) {
                 post.addHeader(header, headers.get(header));
             }
+            System.out.println("Post body: " + new String(request.getPostBody()));
             System.out.println("Content type:" + request.getContentType() + "/" + ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
             if ("application/x-www-form-urlencoded".equals(request.getContentType())) {
                 try {

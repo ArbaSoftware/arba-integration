@@ -59,6 +59,8 @@ public class JsonObject {
             else if (propValue instanceof Integer) {
                 result.setProperty(property, (Integer) propValue);
             }
+            else if (propValue instanceof Boolean)
+                result.setProperty(property, (Boolean) propValue);
             else if (propValue == null) {
                 result.setProperty(property, (String) null);
             }

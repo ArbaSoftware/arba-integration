@@ -8,6 +8,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class JsonArray implements ArrayValue {
+    public JsonArray() {
+
+    }
+
+    public JsonArray(HttpResponse response) throws Exception {
+        Map[] items = JsonUtils.getMapper().readValue(response.getContent(), Map[].class);
+        for (Map item: items) {
+            this.items.add(JsonObject.fromMap(item));
+        }
+    }
+
     private ArrayList <JsonObject> items = new ArrayList<>();
 
     public static JsonArray fromJson(String json) throws Exception {
